@@ -15,3 +15,6 @@ class ReviewsTestCase(TestCase):
 
     def test_review_title_cannot_exceed_100(self):
         self.fail()
+
+    def test_range_of_review_star_should_be_from_0_to_5(self):
+        self.fail()
