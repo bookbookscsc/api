@@ -1,15 +1,24 @@
 from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator,\
+    MinValueValidator,\
+    RegexValidator
 
 
 class BookStore(models.Model):
     name = models.CharField(max_length=20)
 
+    def __str__(self):
+        return self.name
+
 
 class Book(models.Model):
     store = models.ManyToManyField(BookStore)
-    isbn = models.CharField(max_length=13)
+    isbn = models.CharField(max_length=13, validators=[RegexValidator(regex='[0-9]{13}')])
     title = models.CharField(max_length=120)
+    genre = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.title
 
 
 class Review(models.Model):
