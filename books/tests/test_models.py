@@ -6,7 +6,7 @@ from mixer.backend.django import mixer
 
 
 class ValidationTestCase(TestCase):
-    def validation_check(self, model):
+    def assert_raise_validation_error_in(self, model):
         with self.assertRaises(ValidationError):
             model.full_clean()
 
@@ -19,19 +19,19 @@ class ReviewValidationTestCase(ValidationTestCase):
 
     def test_reviews_should_have_title(self):
         self.review.title = ""
-        self.validation_check(self.review)
+        self.assert_raise_validation_error_in(self.review)
 
     def test_reviews_should_have_content(self):
         self.review.content = ""
-        self.validation_check(self.review)
+        self.assert_raise_validation_error_in(self.review)
 
     def test_review_title_cannot_exceed_100(self):
         self.review.title = "a" * 101
-        self.validation_check(self.review)
+        self.assert_raise_validation_error_in(self.review)
 
     def test_range_of_review_star_should_be_from_0_to_5(self):
         self.review.star = 8
-        self.validation_check(self.review)
+        self.assert_raise_validation_error_in(self.review)
 
 
 class BookValidationTestCase(ValidationTestCase):
@@ -39,20 +39,28 @@ class BookValidationTestCase(ValidationTestCase):
     def setUp(self):
         self.book = mixer.blend(Book)
 
-    def test_isbn_length_should_be_13(self):
+    def test_book_isbn_length_should_be_13(self):
         self.book.isbn = '11'
-        self.validation_check(self.book)
+        self.assert_raise_validation_error_in(self.book)
         self.book.isbn = '1' * 14
-        self.validation_check(self.book)
+        self.assert_raise_validation_error_in(self.book)
 
-    def test_isbn_should_be_expressed_number(self):
+    def test_book_isbn_should_be_expressed_number(self):
         self.book.isbn = 'a' * 13
-        self.validation_check(self.book)
+        self.assert_raise_validation_error_in(self.book)
 
     def test_book_title_cannot_exceed_120(self):
         self.book.title = 'a' * 121
-        self.validation_check(self.book)
+        self.assert_raise_validation_error_in(self.book)
 
     def test_book_should_have_title(self):
         self.book.title = ''
-        self.validation_check(self.book)
+        self.assert_raise_validation_error_in(self.book)
+
+    def test_book_genre_cannot_exceed_10(self):
+        self.book.genre = 'a' * 12
+        self.assert_raise_validation_error_in(self.book)
+
+    def test_book_should_have_a_specific_genre(self):
+        self.book.genre = ''
+        self.assert_raise_validation_error_in(self.book)
