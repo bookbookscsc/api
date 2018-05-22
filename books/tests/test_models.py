@@ -79,3 +79,32 @@ class BookStoreValidationTest(ValidationTestCase):
         self.book_store.name = ''
         self.assert_raise_validation_error_in(self.book_store)
 
+
+class ReviewTestCase(TestCase):
+
+    def setUp(self):
+        self.review = mixer.blend(Review)
+
+    def test__str__method(self):
+        self.assertEqual(str(self.review),
+                         f'store : {self.review.store.name},'
+                         f' book : {self.review.book.title},'
+                         f' title : {self.review.title}')
+
+
+class BookTestCase(TestCase):
+
+    def setUp(self):
+        self.book = mixer.blend(Book)
+
+    def test__str__method(self):
+        self.assertEqual(str(self.book), self.book.title)
+
+
+class BookStoreTestCase(TestCase):
+
+    def setUp(self):
+        self.book_store = mixer.blend(BookStore)
+
+    def test__str__method(self):
+        self.assertEqual(str(self.book_store), self.book_store.name)
