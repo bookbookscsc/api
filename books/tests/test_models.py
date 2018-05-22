@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
-from ..models import Review, Book
+from ..models import Review, Book, BookStore
 
 from mixer.backend.django import mixer
 
@@ -64,3 +64,18 @@ class BookValidationTestCase(ValidationTestCase):
     def test_book_should_have_a_specific_genre(self):
         self.book.genre = ''
         self.assert_raise_validation_error_in(self.book)
+
+
+class BookStoreValidationTest(ValidationTestCase):
+
+    def setUp(self):
+        self.book_store = mixer.blend(BookStore)
+
+    def test_book_store_name_length_cannot_exceed_20(self):
+        self.book_store.name = 'a' * 21
+        self.assert_raise_validation_error_in(self.book_store)
+
+    def test_book_store_have_name(self):
+        self.book_store.name = ''
+        self.assert_raise_validation_error_in(self.book_store)
+
