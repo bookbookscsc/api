@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
-from ..models import Review
+from ..models import Review, Book
 
 from mixer.backend.django import mixer
 
@@ -30,3 +30,22 @@ class ReviewValidationTestCase(TestCase):
         self.review.star = 8
         with self.assertRaises(ValidationError):
             self.review.full_clean()
+
+
+class BookValidationTestCase(TestCase):
+
+    def setUp(self):
+        self.book = mixer.blend(Book)
+
+    def test_isbn_length_should_be_13(self):
+        self.book.isbn = '11'
+        with self.assertRaises(ValidationError):
+            self.book.full_clean()
+        self.book.isbn = '1' * 14
+        with self.assertRaises(ValidationError):
+            self.book.full_clean()
+
+    def test_isbn_should_be_expressed_number(self):
+        self.book.isbn = 'a' * 13
+        with self.assertRaises(ValidationError):
+            self.book.full_clean()
