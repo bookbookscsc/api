@@ -10,6 +10,7 @@ class Book(models.Model):
     store = models.ManyToManyField(BookStore)
     isbn = models.CharField(max_length=13)
     title = models.CharField(max_length=120)
+    genre = models.CharField(max_length=10)
 
 
 class Review(models.Model):
