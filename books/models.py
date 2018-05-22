@@ -18,9 +18,10 @@ class Review(models.Model):
     book = models.ForeignKey(Book,
                              on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
-    content = models.TextField(default="")
+    content = models.TextField()
     star = models.IntegerField(default=5,
                                validators=[MinValueValidator(0),
                                            MaxValueValidator(5)])
 
-
+    def __str__(self):
+        return f'store : {self.store.name}, book : {self.book.title}, title : {self.title}'
