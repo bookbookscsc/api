@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
 from ..models import Review, Book, BookStore
 
 from mixer.backend.django import mixer
@@ -38,6 +39,8 @@ class BookValidationTestCase(ValidationTestCase):
 
     def setUp(self):
         self.book = mixer.blend(Book)
+        self.book.isbn = '1' * 13
+        self.book.save()
 
     def test_book_isbn_length_should_be_13(self):
         self.book.isbn = '11'
@@ -64,6 +67,11 @@ class BookValidationTestCase(ValidationTestCase):
     def test_book_should_have_a_specific_genre(self):
         self.book.genre = ''
         self.assert_raise_validation_error_in(self.book)
+
+    def test_book_isbn_should_be_unique(self):
+        another_book = mixer.blend(Book)
+        another_book.isbn = '1' * 13
+        self.assertRaises(IntegrityError, another_book.save)
 
 
 class BookStoreValidationTest(ValidationTestCase):
