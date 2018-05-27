@@ -7,7 +7,7 @@ from django.core.validators import MaxValueValidator,\
 class Book(models.Model):
     isbn = models.CharField(max_length=13,
                             unique=True,
-                            validators=[RegexValidator(regex='[0-9]{13}')])
+                            validators=[RegexValidator(regex='[0-9]{10,13}')])
     title = models.CharField(max_length=120)
     genre = models.CharField(max_length=10)
 
@@ -36,3 +36,13 @@ class Review(models.Model):
 
     def __str__(self):
         return f'store : {self.store.name}, book : {self.book.title}, title : {self.title}'
+
+
+class BID(models.Model):
+    bid = models.IntegerField(primary_key=True)
+    book = models.OneToOneField(Book)
+
+
+class ItemID(models.Model):
+    item_id = models.IntegerField(primary_key=True)
+    book = models.OneToOneField(Book)
