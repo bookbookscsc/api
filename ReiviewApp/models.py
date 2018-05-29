@@ -4,21 +4,26 @@ from django.core.validators import MaxValueValidator,\
     RegexValidator
 
 
-class BookStore(models.Model):
-    name = models.CharField(max_length=20)
-
-    def __str__(self):
-        return self.name
-
-
 class Book(models.Model):
-    store = models.ManyToManyField(BookStore)
-    isbn = models.CharField(max_length=13, validators=[RegexValidator(regex='[0-9]{13}')])
+    isbn = models.CharField(max_length=13,
+                            unique=True,
+                            validators=[RegexValidator(regex='[0-9]{10,13}')])
     title = models.CharField(max_length=120)
     genre = models.CharField(max_length=10)
 
     def __str__(self):
         return self.title
+
+
+class BookStore(models.Model):
+    NAVERBOOK = 'naverbook'
+    KYOBO = 'kyobo'
+
+    name = models.CharField(max_length=20)
+    books = models.ManyToManyField(Book)
+
+    def __str__(self):
+        return self.name
 
 
 class Review(models.Model):
@@ -34,3 +39,13 @@ class Review(models.Model):
 
     def __str__(self):
         return f'store : {self.store.name}, book : {self.book.title}, title : {self.title}'
+
+
+class BID(models.Model):
+    bid = models.IntegerField(primary_key=True)
+    book = models.OneToOneField(Book, on_delete=models.CASCADE)
+
+
+class ItemID(models.Model):
+    item_id = models.IntegerField(primary_key=True)
+    book = models.OneToOneField(Book, on_delete=models.CASCADE)
