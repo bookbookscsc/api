@@ -16,6 +16,9 @@ class Book(models.Model):
 
 
 class BookStore(models.Model):
+    NAVERBOOK = 'naverbook'
+    KYOBO = 'kyobo'
+
     name = models.CharField(max_length=20)
     books = models.ManyToManyField(Book)
 
@@ -40,9 +43,9 @@ class Review(models.Model):
 
 class BID(models.Model):
     bid = models.IntegerField(primary_key=True)
-    book = models.OneToOneField(Book)
+    book = models.OneToOneField(Book, on_delete=models.CASCADE)
 
 
 class ItemID(models.Model):
     item_id = models.IntegerField(primary_key=True)
-    book = models.OneToOneField(Book)
+    book = models.OneToOneField(Book, on_delete=models.CASCADE)
