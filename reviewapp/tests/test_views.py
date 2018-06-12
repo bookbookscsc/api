@@ -1,7 +1,10 @@
+import json
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 from django.urls import reverse
+from datetime import datetime
+from django.db.models import F
 from ..models import Book, BookStore, Review
 from ..serializers import ReviewSerializer
 
@@ -12,16 +15,22 @@ class BooksHTTPAPITestCase(TestCase):
         self.client = APIClient()
         self.store = BookStore(name=BookStore.NAVERBOOK)
         self.store.save()
-
+        date = '2018-01-01'
         self.book_pooh = Book(isbn='13394898',
                               title='곰돌이 푸, 행복한 일은 매일 있어',
-                              genre='essay')
+                              author='aaaa',
+                              cover_link='http://aaa.aaa.aaa',
+                              genre=101,
+                              pub_date=datetime.strptime(date, '%Y-%m-%d'))
         self.book_pooh.save()
         self.store.books.add(self.book_pooh)
 
         self.book_sapiens = Book(isbn='9780781',
                                  title='사피엔스',
-                                 genre='humanity')
+                                 genre=102,
+                                 author='aaaa',
+                                 cover_link='http://aaa.aaa.aaa',
+                                 pub_date=datetime.strptime(date, '%Y-%m-%d'))
         self.book_sapiens.save()
         self.store.books.add(self.book_sapiens)
 
@@ -34,11 +43,15 @@ class BooksHTTPAPITestCase(TestCase):
                             star=5)
             review.save()
 
-    def test_get_hot_books(self):
+    def test_get_trendings(self):
+        Book.objects.filter(isbn=self.book_pooh.isbn).update(look=F('look') + 1)
         response = self.client.get(
-            reverse('hot_books', args=['a'])
+            reverse('trendings'),
+            format='json'
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        books_dict = json.loads(response.content, object_hook=Book.json_to_book_dict)
+        self.assertEqual(2, len(books_dict))
+        self.assertGreater(books_dict[0]['look'], books_dict[1]['look'])
 
     def test_get_reviews_by_isbn(self):
         response = self.client.get(

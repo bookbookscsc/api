@@ -1,15 +1,12 @@
-from django.shortcuts import render
-from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
 from .models import Book, Review
 from .serializers import BookSerializer, ReviewSerializer
 
 
 @api_view(['GET'])
-def get_hot_books(request, genre):
-    books = Book.objects.filter(genre=genre)
+def get_trendings(request):
+    books = Book.objects.order_by('-look')[:10]
     serializer = BookSerializer(books, many=True)
     return Response(serializer.data)
 

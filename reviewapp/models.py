@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MaxValueValidator,\
     MinValueValidator,\
     RegexValidator
+from dateutil.parser import parse
 
 
 class Book(models.Model):
@@ -9,7 +10,35 @@ class Book(models.Model):
                             unique=True,
                             validators=[RegexValidator(regex='[0-9]{10,13}')])
     title = models.CharField(max_length=120)
-    genre = models.CharField(max_length=10)
+    author = models.CharField(max_length=30)
+    publisher = models.CharField(max_length=30)
+    cover_link = models.URLField()
+    genre = models.IntegerField()
+    pub_date = models.DateTimeField()
+    description = models.TextField()
+    look = models.IntegerField(default=1)
+    price_standard = models.IntegerField(null=True)
+
+    @staticmethod
+    def json_to_book_dict(json_dict):
+        field_names = set(field.name for field in Book._meta.get_fields())
+        map_json_and_book_keys = {
+            'pubDate': 'pub_date',
+            'cover': 'cover_link',
+            'categoryId': 'genre',
+            'priceStandard': 'price_standard',
+        }
+        book_dict = {}
+        for k, v in json_dict.items():
+            if k in field_names:
+                book_dict[k] = v
+            if k in map_json_and_book_keys:
+                book_key = map_json_and_book_keys[k]
+                book_dict[book_key] = v
+                if k == 'pubDate':
+                    book_dict['pub_date'] = parse(book_dict['pub_date'])
+
+        return book_dict
 
     def __str__(self):
         return self.title

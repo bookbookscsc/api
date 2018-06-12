@@ -1,6 +1,9 @@
+import os
+import json
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
+from django.db.models import F
 from ..models import Review, Book, BookStore
 
 from mixer.backend.django import mixer
@@ -107,6 +110,22 @@ class BookTestCase(TestCase):
 
     def test__str__method(self):
         self.assertEqual(str(self.book), self.book.title)
+
+    def test_books_look_should_init_one(self):
+        self.assertEqual(1, self.book.look)
+
+    def test_books_update_look_plus_one(self):
+        Book.objects.filter(isbn=self.book.isbn).update(look=F('look')+1)
+        self.book.refresh_from_db()
+        self.assertEqual(2, self.book.look)
+
+    def test_json_to_book_obj(self):
+        sample_path = os.path.join(os.getcwd(), 'reviewapp', 'SampleBooks.json')
+        with open(sample_path, 'r', encoding='utf-8') as f:
+            self.sample_book_dicts = json.loads(f.read(), object_hook=Book.json_to_book_dict)
+            for book_dict in self.sample_book_dicts:
+                book_obj = Book(**book_dict)
+                self.assertIsNotNone(book_obj)
 
 
 class BookStoreTestCase(TestCase):
