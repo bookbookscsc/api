@@ -13,7 +13,11 @@ def get_trendings(request):
 
 @api_view(['GET'])
 def get_reviews(request, isbn):
-    reviews = Review.objects.filter(book__isbn=isbn)
+    length = len(isbn)
+    if length == 10:
+        reviews = Review.objects.filter(book__isbn10=isbn)
+    else:
+        reviews = Review.objects.filter(book__isbn13=isbn)
     bookstore = request.GET.get('bookstore')
     if bookstore is not None:
         reviews = reviews.filter(store=bookstore)

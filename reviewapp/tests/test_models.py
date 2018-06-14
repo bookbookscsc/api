@@ -42,17 +42,18 @@ class BookValidationTestCase(ValidationTestCase):
 
     def setUp(self):
         self.book = mixer.blend(Book)
-        self.book.isbn = '1' * 13
+        self.book.isbn13 = '1' * 13
+        self.book.isbn10 = '1' * 10
         self.book.save()
 
-    def test_book_isbn_length_should_be_13(self):
-        self.book.isbn = '11'
+    def test_book_isbn13_length_should_be_13(self):
+        self.book.isbn13 = '11'
         self.assert_raise_validation_error_in(self.book)
-        self.book.isbn = '1' * 14
+        self.book.isbn13 = '1' * 14
         self.assert_raise_validation_error_in(self.book)
 
-    def test_book_isbn_should_be_expressed_number(self):
-        self.book.isbn = 'a' * 13
+    def test_book_isbn13_should_be_expressed_number(self):
+        self.book.isbn13 = 'a' * 13
         self.assert_raise_validation_error_in(self.book)
 
     def test_book_title_cannot_exceed_120(self):
@@ -71,10 +72,21 @@ class BookValidationTestCase(ValidationTestCase):
         self.book.genre = ''
         self.assert_raise_validation_error_in(self.book)
 
-    def test_book_isbn_should_be_unique(self):
+    def test_book_isbn13_should_be_unique(self):
         another_book = mixer.blend(Book)
-        another_book.isbn = '1' * 13
+        another_book.isbn13 = '1' * 13
         self.assertRaises(IntegrityError, another_book.save)
+
+    def test_book_isbn10_should_be_unique(self):
+        another_book = mixer.blend(Book)
+        another_book.isbn10 = '1' * 10
+        self.assertRaises(IntegrityError, another_book.save)
+
+    def test_book_isbn10_length_should_be_10(self):
+        self.book.isbn10 = '11'
+        self.assert_raise_validation_error_in(self.book)
+        self.book.isbn10 = '1' * 14
+        self.assert_raise_validation_error_in(self.book)
 
 
 class BookStoreValidationTest(ValidationTestCase):
@@ -115,7 +127,7 @@ class BookTestCase(TestCase):
         self.assertEqual(1, self.book.look)
 
     def test_books_update_look_plus_one(self):
-        Book.objects.filter(isbn=self.book.isbn).update(look=F('look')+1)
+        Book.objects.filter(isbn13=self.book.isbn13).update(look=F('look')+1)
         self.book.refresh_from_db()
         self.assertEqual(2, self.book.look)
 
@@ -125,7 +137,8 @@ class BookTestCase(TestCase):
             self.sample_book_dicts = json.loads(f.read(), object_hook=Book.json_to_book_dict)
             for book_dict in self.sample_book_dicts:
                 book_obj = Book(**book_dict)
-                self.assertIsNotNone(book_obj)
+                book_obj.save()
+            self.assertEqual(10, Book.objects.count())
 
 
 class BookStoreTestCase(TestCase):

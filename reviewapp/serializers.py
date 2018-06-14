@@ -16,7 +16,11 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class BookSerializer(serializers.ModelSerializer):
+    isbn = serializers.CharField(source='isbn10')
+    cover = serializers.URLField(source='cover_link')
+    pubDate = serializers.DateTimeField(source='pub_date')
+
     class Meta:
         model = Book
-        fields = ('id', 'isbn', 'title', 'author', 'cover_link', 'look',
-                  'genre', 'pub_date', 'description', 'price_standard', 'publisher')
+        fields = ('id', 'isbn', 'isbn13', 'title', 'author', 'cover', 'look',
+                  'genre', 'pubDate', 'description', 'price_standard', 'publisher')

@@ -1,6 +1,5 @@
 import json
 from django.test import TestCase
-from rest_framework import status
 from rest_framework.test import APIClient
 from django.urls import reverse
 from datetime import datetime
@@ -16,7 +15,8 @@ class BooksHTTPAPITestCase(TestCase):
         self.store = BookStore(name=BookStore.NAVERBOOK)
         self.store.save()
         date = '2018-01-01'
-        self.book_pooh = Book(isbn='13394898',
+        self.book_pooh = Book(isbn10='1339489811',
+                              isbn13='1111111111111',
                               title='곰돌이 푸, 행복한 일은 매일 있어',
                               author='aaaa',
                               cover_link='http://aaa.aaa.aaa',
@@ -25,7 +25,8 @@ class BooksHTTPAPITestCase(TestCase):
         self.book_pooh.save()
         self.store.books.add(self.book_pooh)
 
-        self.book_sapiens = Book(isbn='9780781',
+        self.book_sapiens = Book(isbn10='978078111',
+                                 isbn13='2222222222222',
                                  title='사피엔스',
                                  genre=102,
                                  author='aaaa',
@@ -44,20 +45,33 @@ class BooksHTTPAPITestCase(TestCase):
             review.save()
 
     def test_get_trendings(self):
-        Book.objects.filter(isbn=self.book_pooh.isbn).update(look=F('look') + 1)
+        Book.objects.filter(isbn13=self.book_pooh.isbn13).update(look=F('look') + 1)
         response = self.client.get(
-            reverse('trendings'),
-            format='json'
+            reverse('trendings')
         )
         books_dict = json.loads(response.content, object_hook=Book.json_to_book_dict)
         self.assertEqual(2, len(books_dict))
         self.assertGreater(books_dict[0]['look'], books_dict[1]['look'])
 
-    def test_get_reviews_by_isbn(self):
+    def test_get_reviews_by_isbn13(self):
         response = self.client.get(
-            '/reviews/13394898'
+            '/reviews/1111111111111'
         )
-        serializer = ReviewSerializer(Review.objects.filter(book__isbn=13394898),
+        serializer = ReviewSerializer(Review.objects.filter(book__isbn13='1111111111111'),
                                       many=True)
-        self.assertEqual(10, len(serializer.data))
         self.assertEqual(response.data, serializer.data)
+
+    def test_get_reviews_by_isbn10(self):
+        response = self.client.get(
+            '/reviews/1339489811'
+        )
+        serializer = ReviewSerializer(Review.objects.filter(book__isbn10='1339489811'),
+                                      many=True)
+        self.assertEqual(response.data, serializer.data)
+
+    def test_reviews_by_isbn10_error(self):
+        response = self.client.get(
+            '/reviews/jjjjjjj'
+        )
+        self.assertEqual(0, len(response.data))
+

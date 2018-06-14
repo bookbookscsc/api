@@ -6,9 +6,12 @@ from dateutil.parser import parse
 
 
 class Book(models.Model):
-    isbn = models.CharField(max_length=13,
-                            unique=True,
-                            validators=[RegexValidator(regex='[0-9]{10,13}')])
+    isbn10 = models.CharField(max_length=10,
+                              unique=True,
+                              validators=[RegexValidator(regex='[0-9]{10}')])
+    isbn13 = models.CharField(max_length=13,
+                              unique=True,
+                              validators=[RegexValidator(regex='[0-9]{13}')])
     title = models.CharField(max_length=120)
     author = models.CharField(max_length=30)
     publisher = models.CharField(max_length=30)
@@ -23,6 +26,7 @@ class Book(models.Model):
     def json_to_book_dict(json_dict):
         field_names = set(field.name for field in Book._meta.get_fields())
         map_json_and_book_keys = {
+            'isbn': 'isbn10',
             'pubDate': 'pub_date',
             'cover': 'cover_link',
             'categoryId': 'genre',
